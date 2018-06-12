@@ -16,15 +16,15 @@
  */
 
 var config = {
-        'port': 8080,
-        'apiHost': process.env.__OW_API_HOST
+    'port': 8080,
+    'apiHost': process.env.__OW_API_HOST,
+    'limit': (process.env.__OW_ACTION_BLOB_SIZE || '48') + 'mb'
 };
 
 var bodyParser = require('body-parser');
-var express    = require('express');
+var express = require('express');
 
 var app = express();
-
 
 /**
  * instantiate an object which handles REST calls from the Invoker
@@ -32,15 +32,15 @@ var app = express();
 var service = require('./src/service').getService(config);
 
 app.set('port', config.port);
-app.use(bodyParser.json({ limit: "48mb" }));
+app.use(bodyParser.json({ limit: config.limit }));
 
 app.post('/init', wrapEndpoint(service.initCode));
-app.post('/run',  wrapEndpoint(service.runCode));
+app.post('/run', wrapEndpoint(service.runCode));
 
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
     console.error(err.stack);
     res.status(500).json({ error: "Bad request." });
-  });
+});
 
 service.start(app);
 
